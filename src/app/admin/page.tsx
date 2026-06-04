@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   // デバッグ: 統計（テーブルが存在しない場合 null になる）
   const [

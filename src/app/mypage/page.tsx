@@ -16,7 +16,7 @@ export default async function MypagePage() {
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single() as { data: Profile | null }
+    .maybeSingle() as { data: Profile | null }
 
   const [{ data: listings }, { data: announcements }] = await Promise.all([
     supabase

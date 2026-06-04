@@ -21,7 +21,7 @@ export default function Header() {
     const getProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
         setProfile(data)
       } else {
         setProfile(null)

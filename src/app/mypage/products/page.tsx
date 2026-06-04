@@ -25,7 +25,7 @@ export default function ProductsPage() {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
       setProfile(p)
       const { data: prods } = await supabase
         .from('products')

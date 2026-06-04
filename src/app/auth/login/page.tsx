@@ -44,7 +44,7 @@ function LoginPage() {
       .from('profiles')
       .select('is_admin')
       .eq('id', data.user.id)
-      .single()
+      .maybeSingle()
 
     router.push(profile?.is_admin ? '/admin' : '/mypage')
     router.refresh()

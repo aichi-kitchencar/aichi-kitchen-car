@@ -29,9 +29,9 @@ export default function ListingDetailPage() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
         setProfile(profileData)
-        const { data: appData } = await supabase.from('applications').select('id').eq('listing_id', id).eq('applicant_id', user.id).single()
+        const { data: appData } = await supabase.from('applications').select('id').eq('listing_id', id).eq('applicant_id', user.id).maybeSingle()
         setApplied(!!appData)
       }
     }
