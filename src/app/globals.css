@@ -1,0 +1,29 @@
+﻿@import "tailwindcss";
+
+:root {
+  --color-primary: #C0391B;
+  --color-primary-dark: #a83016;
+  --color-primary-light: #fdf0ed;
+}
+
+body {
+  background: #f9fafb;
+  color: #111827;
+}
+
+/* フォームスタイル共通 */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+  @apply w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C0391B] focus:border-transparent;
+}
+
+/* ライン */
+hr {
+  @apply border-gray-200;
+}
