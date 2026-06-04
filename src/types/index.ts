@@ -40,6 +40,7 @@ export interface Listing {
   category: string
   event_date: string
   event_end_date: string | null
+  event_dates: string[] | null
   application_deadline: string
   max_applicants: number
   fee: string | null

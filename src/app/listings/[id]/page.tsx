@@ -99,7 +99,7 @@ export default function ListingDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             {[
               { icon: <MapPin className="w-4 h-4 text-[#1D9E75]" />, label: '開催場所', value: listing.location },
-              { icon: <Calendar className="w-4 h-4 text-[#1D9E75]" />, label: 'イベント日', value: `${formatDate(listing.event_date)}${listing.event_end_date ? ` 〜 ${formatDate(listing.event_end_date)}` : ''}` },
+              { icon: <Calendar className="w-4 h-4 text-[#1D9E75]" />, label: '出店日程', value: listing.event_dates && listing.event_dates.length > 1 ? listing.event_dates.map(d => formatDate(d)).join(' / ') : formatDate(listing.event_date) },
               { icon: <Clock className="w-4 h-4 text-[#1D9E75]" />, label: '応募締切', value: formatDate(listing.application_deadline) },
               { icon: <Users className="w-4 h-4 text-[#1D9E75]" />, label: '募集台数', value: `${listing.max_applicants}台` },
               ...(listing.fee ? [{ icon: <Banknote className="w-4 h-4 text-[#1D9E75]" />, label: '出店料', value: listing.fee }] : []),

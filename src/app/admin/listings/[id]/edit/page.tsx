@@ -6,16 +6,17 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import { LISTING_CATEGORIES } from '@/types'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Plus, X } from 'lucide-react'
 import type { Listing } from '@/types'
 
 export default function EditListingPage() {
   const { id } = useParams<{ id: string }>()
   const [form, setForm] = useState({
     title: '', description: '', location: '', prefecture: '愛知県',
-    category: '', event_date: '', event_end_date: '', application_deadline: '',
+    category: '', application_deadline: '',
     max_applicants: '1', fee: '', requirements: '', contact_info: '', status: 'open',
   })
+  const [eventDates, setEventDates] = useState<string[]>([''])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -23,30 +24,52 @@ export default function EditListingPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.from('listings').select('*').eq('id', id).single() as { data: Listing | null }
+      const { data } = await supabase.from('listings').select('*').eq('id', id).maybeSingle() as { data: Listing | null }
       if (data) {
         setForm({
           title: data.title, description: data.description, location: data.location,
-          prefecture: data.prefecture, category: data.category, event_date: data.event_date,
-          event_end_date: data.event_end_date || '', application_deadline: data.application_deadline,
+          prefecture: data.prefecture, category: data.category,
+          application_deadline: data.application_deadline,
           max_applicants: String(data.max_applicants), fee: data.fee || '',
           requirements: data.requirements || '', contact_info: data.contact_info || '',
           status: data.status,
         })
+        setEventDates(
+          data.event_dates && data.event_dates.length > 0
+            ? data.event_dates
+            : [data.event_date]
+        )
       }
     }
     load()
   }, [id])
+
+  const addDate = () => setEventDates([...eventDates, ''])
+  const removeDate = (i: number) => setEventDates(eventDates.filter((_, idx) => idx !== i))
+  const updateDate = (i: number, val: string) => {
+    const next = [...eventDates]
+    next[i] = val
+    setEventDates(next)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
+    const sortedDates = [...eventDates].filter(d => d).sort()
+    if (sortedDates.length === 0) {
+      setError('出店日程を1つ以上入力してください')
+      setLoading(false)
+      return
+    }
+
     const { error } = await supabase.from('listings').update({
       ...form,
+      event_date: sortedDates[0],
+      event_end_date: sortedDates.length > 1 ? sortedDates[sortedDates.length - 1] : null,
+      event_dates: sortedDates,
       max_applicants: Number(form.max_applicants),
-      event_end_date: form.event_end_date || null,
       fee: form.fee || null,
       requirements: form.requirements || null,
       contact_info: form.contact_info || null,
@@ -103,29 +126,55 @@ export default function EditListingPage() {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">イベント開始日 *</label>
-              <input type="date" value={form.event_date} onChange={e => f('event_date', e.target.value)} required />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">出店日程 *</label>
+            <div className="space-y-2">
+              {eventDates.map((date, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={e => updateDate(i, e.target.value)}
+                    required
+                    className="flex-1"
+                  />
+                  {eventDates.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeDate(i)}
+                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                      aria-label="この日付を削除"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addDate}
+                className="flex items-center gap-1 text-sm text-[#C0391B] hover:underline mt-1"
+              >
+                <Plus className="w-4 h-4" />
+                日付を追加
+              </button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">イベント終了日</label>
-              <input type="date" value={form.event_end_date} onChange={e => f('event_end_date', e.target.value)} />
-            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">応募締切 *</label>
               <input type="date" value={form.application_deadline} onChange={e => f('application_deadline', e.target.value)} required />
             </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">募集台数 *</label>
               <input type="number" value={form.max_applicants} onChange={e => f('max_applicants', e.target.value)} required min="1" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">出店料</label>
-              <input type="text" value={form.fee} onChange={e => f('fee', e.target.value)} />
-            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">出店料</label>
+            <input type="text" value={form.fee} onChange={e => f('fee', e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">応募条件・注意事項</label>
